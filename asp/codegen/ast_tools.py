@@ -350,6 +350,7 @@ class LoopBlocker(object):
         debug_print(new_outer_for)
         return new_outer_for
 
+
 class LoopSwitcher(NodeTransformer):
     """
     Class that switches two loops.  The user is responsible for making sure the switching
@@ -408,4 +409,5 @@ class LoopSwitcher(NodeTransformer):
                    node.end,
                    node.increment,
                    self.visit(node.body))
+
 
