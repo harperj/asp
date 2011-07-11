@@ -409,3 +409,7 @@ class ReturnStatement (Generable):
             ret = ret + ';'
               
         yield ret
+
+class IfConv(If):
+    def generate(self, with_semicolon=False):
+        return super(IfConv, self).generate()
