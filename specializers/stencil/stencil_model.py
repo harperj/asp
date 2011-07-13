@@ -39,6 +39,8 @@ Expr = Constant
 
 Constant(value = types.IntType | types.LongType | types.FloatType)
 
+Constant(value = types.IntType | types.LongType | types.FloatType)
+
 # Offsets are relative to current output element location, given as a list of integers,
 # one per dimension.
 InputElement(grid=Identifier, offset_list=types.IntType*)
@@ -59,6 +61,9 @@ ScalarBinOp(left=Expr, op=(ast.Add|ast.Sub|ast.Mult|ast.Div|ast.FloorDiv|ast.Mod
 
 # Gives number of arguments for each math function
 math_functions = {'int':1, 'abs':1}
+
+ScalarBinOp(left=Expr, op=(ast.Add|ast.Sub|ast.Mult|ast.Div|ast.FloorDiv), right=Expr)
+''', globals(), checker='StencilModelChecker')
 
 # Verifies a few structural constraints (semantic properties) of the tree
 class StencilModelStructuralConstraintsVerifier(ast.NodeVisitor):
