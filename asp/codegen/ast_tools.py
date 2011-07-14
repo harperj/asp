@@ -202,7 +202,6 @@ class ConvertAST(ast.NodeTransformer):
     def visit_Return(self, node):
         return ReturnStatement(self.visit(node.value))
 
-
 class LoopUnroller(object):
     class UnrollReplacer(NodeTransformer):
         def __init__(self, loopvar, increment):
