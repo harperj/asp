@@ -1,5 +1,5 @@
-import codepy.cgen
-from codepy.cgen import *
+import cgen
+from cgen import *
 import xml.etree.ElementTree as ElementTree
 
 # these are additional classes that, along with codepy's classes, let
@@ -165,11 +165,11 @@ class TypeCast(Expression):
     def generate(self, with_semicolon=False):
         yield "((%s)%s)" % (self.tp.inline(), self.value)
 
-#class ForInitializer(codepy.cgen.Initializer):
+#class ForInitializer(cgen.Initializer):
 #    def __str__(self):
 #        return super(ForInitializer, self).__str__()[0:-1]
 
-class Initializer(codepy.cgen.Initializer):
+class Initializer(cgen.Initializer):
     def __init__(self, vdecl, data):
         self._fields = ['vdecl', 'data']
         super(Initializer, self).__init__(vdecl, data)
@@ -181,7 +181,7 @@ class Initializer(codepy.cgen.Initializer):
             yield line
         yield "%s %s = %s" % (tp_lines[-1], tp_decl, self.data) + (";" if with_semicolon else "")
     
-class Pragma(codepy.cgen.Pragma):
+class Pragma(cgen.Pragma):
     def __init__(self, value):
         self._fields = ['value']
         super(Pragma, self).__init__(value)
@@ -189,7 +189,7 @@ class Pragma(codepy.cgen.Pragma):
     def generate(self, with_semicolon=False):
         return super(Pragma, self).generate()
 
-class RawFor(codepy.cgen.For):
+class RawFor(cgen.For):
     def __init__(self, start, condition, update, body):
         super(RawFor, self).__init__(start, condition, update, body)
         self._fields = ['start', 'condition', 'update', 'body']
@@ -256,10 +256,13 @@ class For(RawFor):
 
 
 
-class FunctionBody(codepy.cgen.FunctionBody):
+class FunctionBody(cgen.FunctionBody):
     def __init__(self, fdecl, body):
         super(FunctionBody, self).__init__(fdecl, body)
         self._fields = ['fdecl', 'body']
+
+    def generate(self, with_semicolon=False):
+        return super(FunctionBody, self).generate()
         
     def to_xml(self):
         node = ElementTree.Element("FunctionBody")
@@ -267,7 +270,7 @@ class FunctionBody(codepy.cgen.FunctionBody):
         ElementTree.SubElement(node, "body").append(self.body.to_xml())
         return node
 
-class FunctionDeclaration(codepy.cgen.FunctionDeclaration):
+class FunctionDeclaration(cgen.FunctionDeclaration):
     def __init__(self, subdecl, arg_decls):
         super(FunctionDeclaration, self).__init__(subdecl, arg_decls)
         self._fields = ['subdecl', 'arg_decls']
@@ -280,7 +283,7 @@ class FunctionDeclaration(codepy.cgen.FunctionDeclaration):
             arg_decls.append(x.to_xml())
         return node
 
-class Value(codepy.cgen.Value):
+class Value(cgen.Value):
     def __init__(self, typename, name):
         super(Value, self).__init__(typename, name)
         self._fields = []
@@ -288,7 +291,7 @@ class Value(codepy.cgen.Value):
     def to_xml(self):
         return ElementTree.Element("Value", attrib={"typename":self.typename, "name":self.name})
 
-class Pointer(codepy.cgen.Pointer):
+class Pointer(cgen.Pointer):
     def __init__(self, subdecl):
         super(Pointer, self).__init__(subdecl)
         self._fields = ['subdecl']
@@ -298,7 +301,7 @@ class Pointer(codepy.cgen.Pointer):
         ElementTree.SubElement(node, "subdecl").append(self.subdecl.to_xml())
         return node
 
-class Block(codepy.cgen.Block):
+class Block(cgen.Block):
     def __init__(self, contents=[]):
         super(Block, self).__init__(contents)
         self._fields = ['contents']
@@ -322,7 +325,7 @@ class UnbracedBlock(Block):
                 yield " " + item_line
 
 
-class Define(codepy.cgen.Define):
+class Define(cgen.Define):
     def __init__(self, symbol, value):
         super(Define, self).__init__(symbol, value)
         self._fields = ['symbol', 'value']
@@ -333,7 +336,7 @@ class Define(codepy.cgen.Define):
     def to_xml(self):
         return ElementTree.Element("Define", attrib={"symbol":self.symbol, "value":self.value})
 
-class Statement(codepy.cgen.Statement):
+class Statement(cgen.Statement):
     def __init__(self, text):
         super(Statement, self).__init__(text)
         self._fields = []
@@ -343,7 +346,7 @@ class Statement(codepy.cgen.Statement):
         node.text = self.text
         return node
 
-class Assign(codepy.cgen.Assign):
+class Assign(cgen.Assign):
     def __init__(self, lvalue, rvalue):
         super(Assign, self).__init__(lvalue, rvalue)
         self._fields = ['lvalue', 'rvalue']
@@ -359,7 +362,7 @@ class Assign(codepy.cgen.Assign):
         rvalue = str(self.rvalue)
         yield "%s = %s" % (lvalue, rvalue) + (";" if with_semicolon else "")
 
-class FunctionCall(codepy.cgen.Generable):
+class FunctionCall(cgen.Generable):
     def __init__(self, fname, params=[]):
         self.fname = fname
         self.params = params
@@ -392,3 +395,17 @@ class Compare(Generable):
 class IfConv(If):
     def generate(self, with_semicolon=False):
         return super(IfConv, self).generate()
+
+
+
+class ReturnStatement (Generable):
+    def __init__ (self, retval):
+        self.retval = retval
+        self._fields = ['retval']
+        
+    def generate (self, with_semicolon=True):
+        ret = 'return ' + str(self.retval)
+        if with_semicolon:
+            ret = ret + ';'
+              
+        yield ret
